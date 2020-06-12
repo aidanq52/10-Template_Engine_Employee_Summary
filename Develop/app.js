@@ -39,6 +39,9 @@ const employeeQuestions = [
 
 // Ask the user for the employee's role
 function askForEmployeeRole(){
+    console.log("---------------")
+    console.log("Add a new Team member");
+    console.log("---------------")
     inquirer
     .prompt({
         message: "What is the employee's role?", 
@@ -59,11 +62,32 @@ function askForEmployeeRole(){
     });
 
 }
-
+function askToContinue(){
+    inquirer
+        .prompt({
+            message: "Do you want to add another team member?",
+            name: "addNew",
+            type: "list",
+            choices:[
+                "Yes",
+                "No"
+            ] 
+            
+        }).then(({addNew}) =>{
+            if (addNew == "Yes"){
+                askForEmployeeRole();
+            } else{
+                createHtmlfile()
+            }
+        })
+}
 
 // Ask for Manager information
 function askForManagerInfo(){
 
+    console.log("---------------")
+    console.log("Add a new Manager");
+    console.log("---------------")
 
 
     inquirer
@@ -75,14 +99,20 @@ function askForManagerInfo(){
                     name: "phone"
                 }
             ])
-        .then( (response)=>{
-            console.log(response)
-        })
+            .then( ({ name, id, email, phone})=>{
+
+                employees.push(new Manager(name, id, email, phone))
+        
+                askForEmployeeRole();
+            })
 }
 
 
 // Ask for Engineer information
 function askForEngineerInfo(){
+    console.log("---------------")
+    console.log("Add a new Engineer");
+    console.log("---------------")
     inquirer
     .prompt([
         ...employeeQuestions,
@@ -92,18 +122,20 @@ function askForEngineerInfo(){
             name: "github"
         }
     ])
-    .then( (response)=>{
-        //build a new engineer object
-        //add the engineer to a list
-        //employees.push(engineer)
+    .then( ({ name, id, email, github})=>{
 
-        //ask the user if they want to add another employee
-    console.log(response)
+        employees.push(new Engineer(name, id, email, github))
+
+        askToContinue();
     })
 }
 
 // Ask for Intern information
 function askForInternInfo(){
+    console.log("---------------")
+    console.log("Add a new Intern");
+    console.log("---------------")
+
     inquirer
     .prompt([
         ...employeeQuestions,
@@ -113,17 +145,30 @@ function askForInternInfo(){
             name: "school"
         }
     ])
-    .then( (response)=>{       
-        //build a new Intern object
-        //add the Intern to a list
-        //employees.push(Intern)
+    .then( ({ name, id, email, school})=>{
 
-        //ask the user if they want to add another employee
-    console.log(response)
+        employees.push(new Intern(name, id, email, school))
+
+        askToContinue();
     })
 }
 
-askForEmployeeRole();
+function createHtmlfile(){
+
+    const html = render(employees);
+
+    if(! fs.existsSync(OUTPUT_DIR)){
+        fs.mkdirSync(OUTPUT_DIR);
+    }
+
+    fs.writeFile(outputPath, html, (err)=>{
+        if(err)console.log(err);
+        else console.log('html File created'
+        )
+    })
+}
+
+askForManagerInfo();
 // Write code to use inquirer to gather information about the development team members,
 // and to create objects for each team member (using the correct classes as blueprints!)
 
